@@ -1,0 +1,15 @@
+# Python
+myenv/
+__pycache__/
+*.pyc
+
+# Secrets
+.env
+
+# App data
+chroma_store/
+uploaded_pdfs/
+
+#OS/editor cruft
+.DS_Store
+.vscode/
