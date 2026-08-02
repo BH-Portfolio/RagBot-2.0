@@ -2,7 +2,7 @@ import os
 from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharcterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 PERSIST_DIRECTORY = "chroma_store"
 UPLOAD_DIR = "uploaded_pdfs"
@@ -23,7 +23,7 @@ def load_vector_store(uploaded_files):
         loader = PyPDFLoader(path)
         docs.extend(loader.load())
 
-    splitter = RecursiveCharcterTextSplitter(chunk_size = 1000, chunk_overlap=100)
+    splitter = RecursiveCharacterTextSplitter(chunk_size = 1000, chunk_overlap=100)
     texts = splitter.split_documents(docs)
 
     embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L12-v2")

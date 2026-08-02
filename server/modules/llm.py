@@ -1,22 +1,34 @@
 import os
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
-from langchain.chains import RetrievalQA
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_classic.chains.combine_documents import create_stuff_documents_chain
+from langchain_classic.chains import create_retrieval_chain
 
 load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-def get_lim_chain(vector_store):
+SYSTEM_PROMPT = (
+    "You are a helpful assistant answering questions about the user's uploaded "
+    "documents. Use the retrieved context below to answer the question. "
+    "If you don't know the answer from the context, say you don't know.\n\n"
+    "Context:\n{context}"
+)
+
+def get_llm_chain(vector_store):
     llm = ChatGroq(
-        groq_api_key=GROQ_API_KEY,
-        model_name="llama3-70b-8192"
+        api_key=GROQ_API_KEY,
+        model="llama3-70b-8192"
     )
 
     retriever = vector_store.as_retriever(search_kwargs={"k": 3})
 
-    return RetrievalQA.from_chain_type(
-        llm=llm,
-        chain_type="stuff",
-        retriever=retriever,
-        return_source_documents=True
-    )
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", SYSTEM_PROMPT),
+        ("human", "{input}"),
+    ])
+
+    combine_docs_chain = create_stuff_documents_chain(llm, prompt)
+    retrieval_chain = create_retrieval_chain(retriever, combine_docs_chain)
+
+    return retrieval_chain

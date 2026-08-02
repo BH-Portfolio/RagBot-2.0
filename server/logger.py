@@ -12,7 +12,7 @@ def setup_logger(name="ragbot"):
     )
     ch.setFormatter(formatter)
 
-    if not logging.handlers:
+    if not logger.handlers:
         logger.addHandler(ch)
 
     return logger
