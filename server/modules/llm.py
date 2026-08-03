@@ -18,7 +18,7 @@ SYSTEM_PROMPT = (
 def get_llm_chain(vector_store):
     llm = ChatGroq(
         api_key=GROQ_API_KEY,
-        model="llama3-70b-8192"
+        model="openai/gpt-oss-120b"
     )
 
     retriever = vector_store.as_retriever(search_kwargs={"k": 3})

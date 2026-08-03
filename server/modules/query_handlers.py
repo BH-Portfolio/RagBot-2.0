@@ -3,8 +3,8 @@ from logger import logger
 def query_chain(chain, user_input: str):
     try:
         logger.debug(f"Running the chain for input: {user_input}")
-        result = chain({"query": user_input})
-        response = result["result"]
+        result = chain.invoke({"input": user_input})
+        response = result["answer"]
 
         sources = [
             doc.metadata.get("source", "")
