@@ -7,7 +7,7 @@ from components.upload import render_uploader
 from components.chat_ui import render_chat
 from components.history_download import render_history_download
 
-render_uploader
-render_chat
-render_history_download
+render_uploader()
+render_chat()
+render_history_download()
 
