@@ -2,7 +2,7 @@
 
 A modular Retrieval-Augmented Generation (RAG) chatbot that lets you upload PDFs and ask questions about them. Built with a decoupled frontend/backend microservice architecture.
 
-**Stack:** FastAPI · Streamlit · ChromaDB · LangChain · LLaMA3 (via Groq) · HuggingFace Embeddings
+**Stack:** FastAPI · Streamlit · ChromaDB · LangChain · LLaMA (via Groq) · HuggingFace Embeddings
 
 ## Architecture
 
@@ -19,7 +19,7 @@ User → Streamlit (frontend) → FastAPI (backend) → ChromaDB (vector store) 
 - Ask natural-language questions and get context-aware answers with source attribution
 - Persistent vector store (ChromaDB) across sessions
 - Download chat history as a `.txt` file
-- CORS-enabled API, ready to be consumed by any frontend
+- CORS-restricted API — configured to accept requests only from the deployed frontend domain (edit `allow_origins` in `main.py` for other setups)
 
 ## Prerequisites
 
@@ -74,6 +74,8 @@ source myenv/bin/activate   # myenv\Scripts\activate on Windows
 pip install -r requirements.txt
 ```
 
+> Requires `langchain-classic`, `langchain-text-splitters`, and `langchain-chroma` in addition to core `langchain` — see `server/requirements.txt` for the full pinned list.
+
 Create a `.env` file in `server/`:
 
 ```env
@@ -113,6 +115,8 @@ docker compose up --build
 
 Vector store and uploaded PDFs persist via named Docker volumes (`chroma_data`, `uploads_data`).
 
+> Note: the `Dockerfile` `CMD`s bind to `$PORT` (falling back to 8000/8501 if unset) for compatibility with hosts like Railway that assign ports dynamically.
+
 ## API Endpoints
 
 | Method | Endpoint         | Description                          |
@@ -129,12 +133,19 @@ This app runs as two long-lived Docker services with a persistent vector store, 
 2. Create two services (one per `Dockerfile`: `server/` and `client/`).
 3. Set `GROQ_API_KEY` on the backend service.
 4. Set `API_URL` on the frontend service to the backend's public URL.
-5. Attach a persistent volume/disk to the backend at `/app/chroma_store`.
+5. Attach persistent volumes to the backend at `/app/chroma_store` and `/app/uploaded_pdfs`.
+6. Ensure `API_URL` includes the `https://` scheme (a bare domain will fail with `requests.exceptions.MissingSchema`).
 
 ## Tech Notes
 
 - Embeddings: `all-MiniLM-L12-v2` (HuggingFace `sentence-transformers`)
-- LLM: `llama3-70b-8192` via Groq
+- LLM: `openai/gpt-oss-120b` via Groq (Groq deprecates models frequently — check [console.groq.com/docs/models](https://console.groq.com/docs/models) if this stops working)
 - Chunking: `RecursiveCharacterTextSplitter`, chunk size 1000, overlap 100
 - Retrieval: top-3 relevant chunks per query
+- Chain construction: `create_retrieval_chain` + `create_stuff_documents_chain` (`langchain-classic` ≥1.0) — not the deprecated `RetrievalQA` API
 
+## Known Limitations / Lessons Learned
+
+- **LangChain's API surface moves fast.** Core modules like text splitters and legacy chains (`RetrievalQA`) have been split out into separate packages (`langchain-text-splitters`, `langchain-classic`) across recent major versions — pin dependency versions if you need long-term stability.
+- **Groq's hosted model lineup changes without much notice.** Models used in tutorials or examples can be decommissioned within months; always check the current model list before assuming a model name works.
+- **Container platforms often assign ports dynamically.** Hardcoding a port in a Dockerfile `CMD` (rather than reading `$PORT`) can silently break deployments on platforms like Railway even when the container itself is running fine.
