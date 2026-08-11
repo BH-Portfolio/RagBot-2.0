@@ -14,7 +14,7 @@ app = FastAPI(title="RagBot 2.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://supportive-adventure-production-b755.up.railway.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
