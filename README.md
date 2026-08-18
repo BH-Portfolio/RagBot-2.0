@@ -127,7 +127,7 @@ Vector store and uploaded PDFs persist via named Docker volumes (`chroma_data`, 
 
 ## Deployment
 
-This app runs as two long-lived Docker services with a persistent vector store, so it's best suited to a Docker-friendly host such as **Railway** or **Render** rather than a serverless platform like Vercel:
+This app runs as two long-lived Docker services with a persistent vector store, so it's best suited to a Docker-friendly host such as **Railway**:
 
 1. Push this repo to GitHub.
 2. Create two services (one per `Dockerfile`: `server/` and `client/`).
